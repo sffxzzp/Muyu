@@ -1,0 +1,12 @@
+# Replace this domain with the domain of your deployment.
+# For this same-host proxy, start MUYU with
+# TRUSTED_PROXIES=127.0.0.1/32,::1/128 so per-IP quotas use the real visitor IP.
+# Keep the Go listener private and trust only the actual controlled proxy hops.
+subtitles.example.com {
+    encode zstd gzip
+    reverse_proxy 127.0.0.1:7777 {
+        transport http {
+            response_header_timeout 200s
+        }
+    }
+}

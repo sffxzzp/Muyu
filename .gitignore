@@ -1,0 +1,31 @@
+# Dependencies and generated frontend files
+/web/node_modules/
+/web/dist/
+/web/.vite/
+
+# Go binaries and release packages
+/deploy/
+/bin/
+/artifacts/
+/muyu
+/muyu.exe
+*.test
+*.test.exe
+
+# Test output
+/web/test-results/
+/web/playwright-report/
+/web/coverage/
+/coverage/
+/scripts/
+
+# Local configuration and temporary files
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
+__pycache__/
+*.pyc
+BUILDINFO.md

@@ -1,0 +1,409 @@
+[
+  {
+    "name": "multilingual selection, tags and protected translations",
+    "request": {
+      "baseUrl": "https://custom-model.example/v1",
+      "apiKey": "fixture-key-not-a-secret",
+      "model": "fixture-model",
+      "sourceLanguage": "en",
+      "targetLanguage": "zh-CN",
+      "background": "教学视频，表达清晰。",
+      "styleNotes": "保持第二人称。",
+      "glossary": [
+        {
+          "source": "Obsidian Spire",
+          "target": "黑曜石尖塔"
+        },
+        {
+          "source": "Ann",
+          "target": "安",
+          "note": "人名",
+          "locked": true
+        },
+        {
+          "source": "Anna",
+          "target": "安娜"
+        },
+        {
+          "source": "A&B Institute",
+          "target": "甲乙研究所",
+          "locked": true
+        },
+        {
+          "source": "玄武门",
+          "target": "玄武门"
+        },
+        {
+          "source": "Order of the Dawn",
+          "target": "黎明骑士团",
+          "locked": true
+        },
+        {
+          "source": "Unrelated Order",
+          "target": "其他骑士团",
+          "locked": true
+        }
+      ],
+      "cues": [
+        {
+          "id": 8,
+          "text": "Meet <i>ANN</i> at the A&amp;B Institute. Project Nova is open."
+        },
+        {
+          "id": 9,
+          "text": "请前往玄武门。"
+        }
+      ],
+      "context": [
+        {
+          "source": "We reached the Obsidian Spire.",
+          "target": "我们抵达黑曜石尖塔。"
+        }
+      ],
+      "futureContext": [
+        {
+          "id": 10,
+          "text": "The Order of the Dawn is coming."
+        }
+      ],
+      "temperature": 0.1,
+      "maxTokens": 8192,
+      "tokenParameter": "max_tokens",
+      "timeoutSeconds": 120
+    },
+    "completion": {
+      "choices": [
+        {
+          "message": {
+            "content": "{\"translations\": [{\"id\": 9, \"text\": \" 前往玄武门。\\n\\n\"}, {\"id\": 8, \"text\": \"到甲乙研究所与<i>安</i>见面。新星计划已启动。\"}], \"glossary\": [{\"source\": \" Ann \", \"target\": \"安妮\", \"locked\": true}, {\"source\": \"Project Nova\", \"target\": \"新星计划\", \"note\": \"项目名\", \"locked\": true}], \"style_notes\": \" 简洁，使用第二人称。 \"}"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 18,
+        "total_tokens": 53
+      }
+    },
+    "expected": {
+      "translations": [
+        {
+          "id": 8,
+          "text": "到甲乙研究所与<i>安</i>见面。新星计划已启动。"
+        },
+        {
+          "id": 9,
+          "text": "前往玄武门。"
+        }
+      ],
+      "glossary": [
+        {
+          "source": "Obsidian Spire",
+          "target": "黑曜石尖塔"
+        },
+        {
+          "source": "Ann",
+          "target": "安",
+          "note": "人名",
+          "locked": true
+        },
+        {
+          "source": "Anna",
+          "target": "安娜"
+        },
+        {
+          "source": "A&B Institute",
+          "target": "甲乙研究所",
+          "locked": true
+        },
+        {
+          "source": "玄武门",
+          "target": "玄武门"
+        },
+        {
+          "source": "Order of the Dawn",
+          "target": "黎明骑士团",
+          "locked": true
+        },
+        {
+          "source": "Unrelated Order",
+          "target": "其他骑士团",
+          "locked": true
+        },
+        {
+          "source": "Project Nova",
+          "target": "新星计划",
+          "note": "项目名"
+        }
+      ],
+      "glossarySent": 5,
+      "glossaryUsed": [
+        {
+          "source": "A&B Institute",
+          "target": "甲乙研究所",
+          "locked": true
+        },
+        {
+          "source": "Ann",
+          "target": "安",
+          "note": "人名",
+          "locked": true
+        },
+        {
+          "source": "玄武门",
+          "target": "玄武门"
+        },
+        {
+          "source": "Order of the Dawn",
+          "target": "黎明骑士团",
+          "locked": true
+        },
+        {
+          "source": "Obsidian Spire",
+          "target": "黑曜石尖塔"
+        }
+      ],
+      "styleNotes": "简洁，使用第二人称。",
+      "warnings": [
+        {
+          "key": "术语「{0}」沿用已有译法「{1}」",
+          "params": {
+            "0": "Ann",
+            "1": "安"
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 18,
+        "total_tokens": 53
+      }
+    }
+  },
+  {
+    "name": "word boundaries, full master merge and empty style preservation",
+    "request": {
+      "baseUrl": "https://custom-model.example/v1",
+      "apiKey": "fixture-key-not-a-secret",
+      "model": "fixture-model",
+      "sourceLanguage": "en",
+      "targetLanguage": "zh-CN",
+      "background": "教学视频，表达清晰。",
+      "styleNotes": "保持第二人称。",
+      "glossary": [
+        {
+          "source": "Hidden Lore",
+          "target": "旧设定"
+        },
+        {
+          "source": "Ann",
+          "target": "安"
+        },
+        {
+          "source": "Café Lumière",
+          "target": "光明咖啡馆"
+        }
+      ],
+      "cues": [
+        {
+          "id": 4,
+          "text": "The annual report mentions Anna."
+        }
+      ],
+      "context": [],
+      "futureContext": [
+        {
+          "id": 5,
+          "text": "Visit CAFÉ\nLUMIÈRE tomorrow."
+        }
+      ],
+      "temperature": null,
+      "maxTokens": 8192,
+      "tokenParameter": "max_completion_tokens",
+      "timeoutSeconds": 120
+    },
+    "completion": {
+      "choices": [
+        {
+          "message": {
+            "content": "```json\n{\"translations\": [{\"id\": 4, \"text\": \" 年报提到了安娜。\\r\\n\\r\\n  明天再看。 \"}], \"glossary\": [{\"source\": \"hidden lore\", \"target\": \"不应覆盖旧设定\"}, {\"source\": \"Aurora Project\", \"target\": \"曙光计划\"}], \"style_notes\": \"\"}\n```"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 18,
+        "total_tokens": 53
+      }
+    },
+    "expected": {
+      "translations": [
+        {
+          "id": 4,
+          "text": "年报提到了安娜。\n明天再看。"
+        }
+      ],
+      "glossary": [
+        {
+          "source": "Hidden Lore",
+          "target": "旧设定"
+        },
+        {
+          "source": "Ann",
+          "target": "安"
+        },
+        {
+          "source": "Café Lumière",
+          "target": "光明咖啡馆"
+        }
+      ],
+      "glossarySent": 1,
+      "glossaryUsed": [
+        {
+          "source": "Café Lumière",
+          "target": "光明咖啡馆"
+        }
+      ],
+      "styleNotes": "保持第二人称。",
+      "warnings": [
+        {
+          "key": "术语「{0}」沿用已有译法「{1}」",
+          "params": {
+            "0": "hidden lore",
+            "1": "旧设定"
+          }
+        },
+        {
+          "key": "本轮跳过 {0} 条未在当前块原文中找到的术语，译文已保留",
+          "params": {
+            "0": 1
+          }
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 18,
+        "total_tokens": 53
+      }
+    }
+  },
+  {
+    "name": "Unicode case mapping and scripts without word spaces",
+    "request": {
+      "baseUrl": "https://custom-model.example/v1",
+      "apiKey": "fixture-key-not-a-secret",
+      "model": "fixture-model",
+      "sourceLanguage": "en",
+      "targetLanguage": "zh-CN",
+      "background": "教学视频，表达清晰。",
+      "styleNotes": "保持第二人称。",
+      "glossary": [
+        {
+          "source": "istanbul",
+          "target": "伊斯坦布尔"
+        },
+        {
+          "source": "ΙΣΟΣ",
+          "target": "伊索斯"
+        },
+        {
+          "source": "서울",
+          "target": "首尔"
+        },
+        {
+          "source": "قلعة النور",
+          "target": "光之城堡"
+        },
+        {
+          "source": "Ann",
+          "target": "安"
+        }
+      ],
+      "cues": [
+        {
+          "id": 1,
+          "text": "İSTANBUL ΙΣΟΣ 서울에서 قلعة النور annual"
+        }
+      ],
+      "context": [],
+      "futureContext": [],
+      "temperature": 0.1,
+      "maxTokens": 8192,
+      "tokenParameter": "max_tokens",
+      "timeoutSeconds": 120
+    },
+    "completion": {
+      "choices": [
+        {
+          "message": {
+            "content": "{\"translations\": [{\"id\": 1, \"text\": \"伊斯坦布尔、伊索斯、首尔和光之城堡。\"}], \"glossary\": [], \"style_notes\": \"保持地名。\"}"
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 18,
+        "total_tokens": 53
+      }
+    },
+    "expected": {
+      "translations": [
+        {
+          "id": 1,
+          "text": "伊斯坦布尔、伊索斯、首尔和光之城堡。"
+        }
+      ],
+      "glossary": [
+        {
+          "source": "istanbul",
+          "target": "伊斯坦布尔"
+        },
+        {
+          "source": "ΙΣΟΣ",
+          "target": "伊索斯"
+        },
+        {
+          "source": "서울",
+          "target": "首尔"
+        },
+        {
+          "source": "قلعة النور",
+          "target": "光之城堡"
+        },
+        {
+          "source": "Ann",
+          "target": "安"
+        }
+      ],
+      "glossarySent": 4,
+      "glossaryUsed": [
+        {
+          "source": "قلعة النور",
+          "target": "光之城堡"
+        },
+        {
+          "source": "istanbul",
+          "target": "伊斯坦布尔"
+        },
+        {
+          "source": "ΙΣΟΣ",
+          "target": "伊索斯"
+        },
+        {
+          "source": "서울",
+          "target": "首尔"
+        }
+      ],
+      "styleNotes": "保持地名。",
+      "warnings": [],
+      "usage": {
+        "prompt_tokens": 35,
+        "completion_tokens": 18,
+        "total_tokens": 53
+      }
+    }
+  }
+]

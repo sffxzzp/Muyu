@@ -1,0 +1,28 @@
+{
+  "name": "muyu-subtitle-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "format": "prettier --write src tests *.ts *.json index.html",
+    "build": "vue-tsc --noEmit && vite build",
+    "test": "vitest run src",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.45.0",
+    "entities": "7.0.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^22.13.10",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "prettier": "^3.9.6",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.2",
+    "vitest": "^4.1.11",
+    "vue-tsc": "^2.2.8"
+  }
+}

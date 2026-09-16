@@ -1,0 +1,26 @@
+services:
+  muyu:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - target: 7777
+        published: "${MUYU_PORT:-7777}"
+        host_ip: "${MUYU_BIND_IP:-127.0.0.1}"
+        protocol: tcp
+    environment:
+      LISTEN_HOST: "0.0.0.0"
+      LISTEN_PORT: "7777"
+      UI_LANG: "${UI_LANG:-en}"
+      # These upstream policies apply to server forwarding, not browser-direct requests.
+      API_HOSTS: "${API_HOSTS:-integrate.api.nvidia.com,api.deepseek.com,api.openai.com,openrouter.ai}"
+      IP_RPM: "${IP_RPM:-60}"
+      HOST_RPM: "${HOST_RPM:-300}"
+      GLOBAL_RPM: "${GLOBAL_RPM:-600}"
+      IP_CONCURRENCY: "${IP_CONCURRENCY:-2}"
+      HOST_CONCURRENCY: "${HOST_CONCURRENCY:-8}"
+      MAX_CONCURRENT_REQUESTS: "${MAX_CONCURRENT_REQUESTS:-32}"
+      TRUSTED_PROXIES: "${TRUSTED_PROXIES:-}"
+      ALLOW_PRIVATE_UPSTREAMS: "${ALLOW_PRIVATE_UPSTREAMS:-false}"
+    stop_grace_period: 30s

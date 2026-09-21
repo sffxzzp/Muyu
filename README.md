@@ -61,4 +61,5 @@ make test-e2e
 ```
 
 任务记录、API Key（可选记住）和界面偏好都保存在 localStorage。换浏览器或清空站点数据前请先导出备份。
+
 Task history, API keys (if you choose to remember them), and UI preferences are stored in localStorage. Export a backup before switching browsers or clearing site data.

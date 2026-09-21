@@ -153,7 +153,8 @@ export class Runner {
                 targetLanguage: job.settings.targetLanguage,
                 background: job.settings.background,
                 styleNotes: job.styleNotes,
-                glossary: job.glossary,
+                glossary: job.settings.useGlossary ? job.glossary : [],
+                useGlossary: job.settings.useGlossary,
                 cues: job.document.cues.slice(chunk.start, chunk.end).map(({ id, text }) => ({ id, text })),
                 context: job.document.cues
                   .slice(Math.max(0, chunk.start - job.settings.contextSize), chunk.start)
@@ -224,11 +225,15 @@ export class Runner {
         const translations = { ...job.translations }
         for (const line of result.translations) translations[line.id] = line.text
         job.translations = translations
-        job.glossary = result.glossary
-        job.lastGlossarySent = result.glossarySent
+        if (job.settings.useGlossary) job.glossary = result.glossary
+        job.lastGlossarySent = job.settings.useGlossary ? result.glossarySent : 0
         job.styleNotes = result.styleNotes
         job.completedChunks++
-        job.glossaryHistory.push({ chunk: job.completedChunks, at: this.now(), terms: result.glossaryUsed })
+        job.glossaryHistory.push({
+          chunk: job.completedChunks,
+          at: this.now(),
+          terms: job.settings.useGlossary ? result.glossaryUsed : [],
+        })
         if (job.glossaryHistory.length > GLOSSARY_HISTORY_LIMIT)
           job.glossaryHistory.splice(0, job.glossaryHistory.length - GLOSSARY_HISTORY_LIMIT)
         for (const field of ['prompt_tokens', 'completion_tokens', 'total_tokens'] as const)

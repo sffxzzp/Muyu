@@ -18,8 +18,8 @@ async function prepare(page: Page, base = directURL) {
   await page.getByLabel('目标块大小', { exact: true }).fill('4')
   await page.getByLabel('分块条数上限', { exact: true }).fill('4')
   await page.getByLabel('每分钟请求数 RPM', { exact: true }).fill('600')
-  await page.getByRole('button', { name: '预设术语', exact: true }).click()
-  await page.getByLabel('预设术语', { exact: true }).fill('cash flow = 现金流\nUnrelated Order = 其他骑士团')
+  await page.getByTestId('seed-glossary').click()
+  await page.getByLabel(/预设术语|Seed glossary/, { exact: true }).fill('cash flow = 现金流\nUnrelated Order = 其他骑士团')
   await page.locator('.advanced-settings summary').click()
   await page.getByLabel('失败重试次数', { exact: true }).fill('0')
 }

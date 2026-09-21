@@ -23,8 +23,8 @@ async function prepareSample(page: Page) {
   await page.getByLabel('分块条数上限', { exact: true }).fill('4')
   await page.getByLabel('每分钟请求数 RPM', { exact: true }).fill('600')
   await page.getByLabel('背景设定', { exact: true }).fill('这是财务教育讲座，面向初学者，使用亲切的口语。')
-  await page.getByRole('button', { name: '预设术语', exact: true }).click()
-  await page.getByLabel('预设术语', { exact: true }).fill('cash flow = 现金流')
+  await page.getByTestId('seed-glossary').click()
+  await page.getByLabel(/预设术语|Seed glossary/, { exact: true }).fill('cash flow = 现金流')
 }
 
 async function controlTranslationResponses(page: Page) {
@@ -102,14 +102,14 @@ test('translate, refresh, resume, edit, export, clear and restore a real browser
   expect(srt.match(/ --> /g) ?? []).toHaveLength(12)
   expect(srt).toContain('00:00:01,000 --> 00:00:04,200\nWelcome back.')
   expect(srt).toContain('欢迎回来。今天，一起理解现金流。')
-  await page.getByRole('tab', { name: /术语与风格/ }).click()
-  await expect(page.locator('.glossary-usage')).toHaveText('累计 4 条 · 上轮携带 2 条')
-  await page.locator('.glossary-usage').scrollIntoViewIfNeeded()
+  await page.getByTestId('glossary-tab').click()
+  await expect(page.getByTestId('glossary-usage')).toHaveText('累计 4 条 · 上轮携带 2 条')
+  await page.getByTestId('glossary-usage').scrollIntoViewIfNeeded()
   await page.screenshot({ path: path.join(artifacts, 'glossary-carry-cn.png') })
   await page.getByRole('textbox', { name: '新增术语原文' }).fill('asset')
   await page.getByRole('textbox', { name: '新增术语译文' }).fill('资产')
   await page.getByRole('button', { name: '添加', exact: true }).click()
-  await expect(page.getByRole('textbox', { name: '术语 5 原文', exact: true })).toHaveValue('asset')
+  await expect(page.getByTestId('term-5-source')).toHaveValue('asset')
   const backupPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: '备份', exact: true }).click()
   const backupDownload = await backupPromise
@@ -192,32 +192,51 @@ test('a glossary beyond 400 terms stays editable, bounded in prompts and complet
     expect(!!kept?.locked).toBe(!!term.locked)
   }
   expect(saved.lastGlossarySent).toBe(calls[3].data.established_glossary.length)
-  await page.getByRole('tab', { name: /术语与风格/ }).click()
-  await expect(page.locator('.glossary-usage')).toHaveText(
+  await page.getByTestId('glossary-tab').click()
+  await expect(page.getByTestId('glossary-usage')).toHaveText(
     `累计 ${saved.glossary.length} 条 · 上轮携带 ${saved.lastGlossarySent} 条`,
   )
   await page.getByRole('textbox', { name: '新增术语原文' }).fill('Manual Project')
   await page.getByRole('textbox', { name: '新增术语译文' }).fill('手动计划')
   await page.getByRole('button', { name: '添加', exact: true }).click()
   const total = saved.glossary.length + 1
-  await expect(page.getByLabel(`术语 ${total} 原文`, { exact: true })).toHaveValue('Manual Project')
+  await expect(page.getByTestId(`term-${total}-source`)).toHaveValue('Manual Project')
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: '备份', exact: true }).click()
   const backup = JSON.parse(await readFile((await (await downloadPromise).path())!, 'utf-8'))
   expect(backup.jobs[0].glossary).toHaveLength(total)
   await page.reload()
-  await page.getByRole('tab', { name: /术语与风格/ }).click()
-  await expect(page.locator('.glossary-usage')).toHaveText(
+  await page.getByTestId('glossary-tab').click()
+  await expect(page.getByTestId('glossary-usage')).toHaveText(
     `累计 ${total} 条 · 上轮携带 ${saved.lastGlossarySent} 条`,
   )
   await page.getByRole('button', { name: 'English', exact: true }).click()
   await page.getByRole('button', { name: 'Switch to dark mode', exact: true }).click()
-  await expect(page.locator('.glossary-usage')).toHaveText(
+  await expect(page.getByTestId('glossary-usage')).toHaveText(
     `${total} terms saved · ${saved.lastGlossarySent} sent last round`,
   )
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.locator('.glossary-usage').scrollIntoViewIfNeeded()
+  await page.getByTestId('glossary-usage').scrollIntoViewIfNeeded()
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+})
+
+test('can skip the glossary so terms are not sent or extracted', async ({ page, request }) => {
+  await page.goto('/')
+  await setupProfile(page)
+  await prepareSample(page)
+  await page.getByTestId('use-glossary').uncheck()
+  await expect(page.getByTestId('seed-glossary')).toHaveCount(0)
+  await page.getByRole('button', { name: '开始翻译', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '每一句，都已抵达。' })).toBeVisible()
+  const { calls } = await (await request.get(controlURL)).json()
+  expect(calls.length).toBeGreaterThan(0)
+  expect(calls.every((call: { data: { established_glossary: unknown[] } }) => call.data.established_glossary.length === 0)).toBe(true)
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('muyu.workspace.v1')!).jobs[0])
+  expect(saved.settings.useGlossary).toBe(false)
+  expect(saved.glossary).toEqual([])
+  expect(saved.lastGlossarySent).toBe(0)
+  await page.getByTestId('glossary-tab').click()
+  await expect(page.locator('.glossary-disabled')).toContainText('这个任务未启用术语库')
 })
 
 test('legacy checkpoint keeps its saved blocks and zero lookahead when resuming', async ({

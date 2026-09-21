@@ -376,6 +376,7 @@ defineExpose({ showCurrentChunk })
             }}<span>{{ selected.document.cues.length }}</span></button
           ><button
             role="tab"
+            data-testid="glossary-tab"
             :aria-selected="detailTab === 'glossary'"
             :class="{ active: detailTab === 'glossary' }"
             @click="detailTab = 'glossary'"
@@ -416,7 +417,10 @@ defineExpose({ showCurrentChunk })
               <p>
                 {{ t('完整词表保存在本地，每轮按相关性携带。手动编辑的术语会锁定，优先沿用你的译法。') }}
               </p>
-              <p v-if="selected.lastGlossarySent !== null" class="glossary-usage">
+              <p v-if="!selected.settings.useGlossary" class="glossary-disabled">
+                {{ t('这个任务未启用术语库。开启后才会向模型发送并积累术语。') }}
+              </p>
+              <p v-if="selected.lastGlossarySent !== null" class="glossary-usage" data-testid="glossary-usage">
                 {{
                   t('累计 {0} 条 · 上轮携带 {1} 条', {
                     0: selected.glossary.length,
@@ -469,6 +473,7 @@ defineExpose({ showCurrentChunk })
                   :job-id="selected.id"
                   :field="termField(term.id!, 'source')"
                   :label="t('术语 {0} 原文', { 0: index + 1 })"
+                  :test-id="`term-${index + 1}-source`"
                   :disabled="selectedRunning"
                 />
               </div>
@@ -476,11 +481,13 @@ defineExpose({ showCurrentChunk })
                 :job-id="selected.id"
                 :field="termField(term.id!, 'target')"
                 :label="t('术语 {0} 译法', { 0: index + 1 })"
+                :test-id="`term-${index + 1}-target`"
                 :disabled="selectedRunning"
               /><MemoryField
                 :job-id="selected.id"
                 :field="termField(term.id!, 'note')"
                 :label="t('术语 {0} 备注', { 0: index + 1 })"
+                :test-id="`term-${index + 1}-note`"
                 :disabled="selectedRunning"
                 placeholder="—"
               /><button
@@ -597,6 +604,10 @@ defineExpose({ showCurrentChunk })
                   })
                 }}
               </dd>
+            </div>
+            <div>
+              <dt>{{ t('术语库') }}</dt>
+              <dd>{{ selected.settings.useGlossary ? t('已启用') : t('已关闭') }}</dd>
             </div>
             <div>
               <dt>{{ t('背景设定') }}</dt>

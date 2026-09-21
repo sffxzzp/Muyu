@@ -1,5 +1,6 @@
 import { message, type Message, type MessageKey } from './messages'
-import systemPrompt from './system_prompt.txt?raw'
+import glossarySystemPrompt from './system_prompt.txt?raw'
+import noGlossarySystemPrompt from './system_prompt_no_glossary.txt?raw'
 import { post, serverError, APIError, DirectConnectionError } from './transport'
 import { selectGlossary, termMatcher } from './glossary'
 import { byteLength, cleanText, inlineTags, termKey, trimSpace } from './text'
@@ -7,6 +8,10 @@ import { boundedText, limits, normalizeTranslation } from './validation'
 import type { Term, TranslationRequest, TranslationResult, TranslationTransport, Usage } from './types'
 
 const maximumResponseBytes = 2 * 1024 * 1024
+
+export function translationSystemPrompt(useGlossary = true): string {
+  return useGlossary ? glossarySystemPrompt : noGlossarySystemPrompt
+}
 
 function requireValue(condition: unknown, message: Message, retryable = false): asserts condition {
   if (!condition) throw new APIError(message, retryable)
@@ -122,12 +127,12 @@ function validateRequest(req: TranslationRequest): void {
 export function prepareTranslation(req: TranslationRequest) {
   validateRequest(req)
   const endpoint = directEndpoint(req.baseUrl)
-  const glossary = selectGlossary(req)
+  const glossary = req.useGlossary === false ? [] : selectGlossary(req)
   const payload: Record<string, unknown> = {
     model: req.model,
     stream: false,
     messages: [
-      { role: 'system', content: systemPrompt },
+      { role: 'system', content: translationSystemPrompt(req.useGlossary !== false) },
       {
         role: 'user',
         content: JSON.stringify({
@@ -206,11 +211,13 @@ export function parseTranslation(
   const inCurrentSource = termMatcher(req.cues.map((cue) => cue.text).join(' '))
   const warnings: Message[] = []
   const newTerms = Array.isArray(decoded.glossary) ? decoded.glossary : []
-  if (!Array.isArray(decoded.glossary)) warnings.push('本轮术语字段无效，已保留译文和已有术语库')
-  if (newTerms.length > limits.newTerms) warnings.push('本轮新增术语超过 40 条，已忽略超出部分并保留译文')
+  if (req.useGlossary !== false && !Array.isArray(decoded.glossary))
+    warnings.push('本轮术语字段无效，已保留译文和已有术语库')
+  if (req.useGlossary !== false && newTerms.length > limits.newTerms)
+    warnings.push('本轮新增术语超过 40 条，已忽略超出部分并保留译文')
   let invalidTerms = 0
   let unmatchedTerms = 0
-  for (const value of newTerms.slice(0, limits.newTerms)) {
+  for (const value of req.useGlossary === false ? [] : newTerms.slice(0, limits.newTerms)) {
     if (!(
       record(value) &&
       typeof value.source === 'string' &&

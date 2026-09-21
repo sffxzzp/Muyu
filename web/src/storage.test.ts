@@ -198,6 +198,7 @@ describe('browser checkpoints', () => {
       parseBackup(JSON.stringify({ kind: 'muyu-backup', version: 1, jobs: old.jobs })).jobs[0],
     ]) {
       expect(migrated.settings.futureContextSize).toBe(0)
+      expect(migrated.settings.useGlossary).toBe(true)
       expect(migrated.settings.contextSize).toBe(job.settings.contextSize)
       expect(migrated.lastGlossarySent).toBeNull()
       expect(migrated.chunks).toEqual(job.chunks)

@@ -780,7 +780,8 @@ summary::-webkit-details-marker {
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 8px 12px;
+  flex-wrap: wrap;
 }
 .glossary-icon {
   color: var(--secondary);
@@ -807,6 +808,19 @@ summary::-webkit-details-marker {
 .glossary-intro .text-button {
   font-size: var(--font-caption);
   color: var(--secondary);
+  flex-shrink: 0;
+}
+.glossary-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.glossary-setting {
+  margin-top: 4px;
+}
+.glossary-disabled {
+  color: var(--muted);
+  margin-top: 8px;
 }
 .seed-terms {
   margin-top: 15px;
@@ -2650,12 +2664,11 @@ summary::-webkit-details-marker {
   .upload-zone > strong {
     font-size: var(--font-small);
   }
-  .glossary-intro {
-    flex-wrap: wrap;
-  }
   .glossary-intro > .text-button {
-    margin-left: 44px;
     font-size: var(--font-caption);
+  }
+  .glossary-toggle {
+    margin-left: 0;
   }
   .task-table-header,
   .task-table-row {
@@ -3859,10 +3872,10 @@ summary::-webkit-details-marker {
   font-size: var(--font-label);
 }
 :root[lang='en'] .glossary-intro {
-  flex-wrap: wrap;
+  align-items: flex-start;
 }
-:root[lang='en'] .glossary-intro > .text-button {
-  margin-left: 44px;
+:root[lang='en'] .glossary-toggle {
+  margin-left: 0;
 }
 :root[lang='en'] .language-fields {
   grid-template-columns: minmax(0, 1fr);
@@ -3919,8 +3932,8 @@ summary::-webkit-details-marker {
   }
 }
 @media (max-width: 600px) {
-  :root[lang='en'] .glossary-intro > .text-button {
-    margin-left: 0;
+  :root[lang='en'] .glossary-toggle {
+    width: 100%;
   }
   .compact-comparison-label {
     display: inline;

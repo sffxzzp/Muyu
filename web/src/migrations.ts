@@ -19,7 +19,11 @@ export function migrateJob(value: any): unknown {
       : value.events,
     status: ['queued', 'running'].includes(value.status) ? 'paused' : value.status,
     settings: record(value.settings)
-      ? { ...value.settings, futureContextSize: value.settings.futureContextSize ?? 0 }
+      ? {
+          ...value.settings,
+          futureContextSize: value.settings.futureContextSize ?? 0,
+          useGlossary: value.settings.useGlossary ?? true,
+        }
       : value.settings,
     lastGlossarySent: value.lastGlossarySent ?? null,
     glossaryHistory: value.glossaryHistory ?? [],

@@ -50,6 +50,7 @@ export interface Settings {
   temperature: number | null
   maxTokens: number
   timeoutSeconds: number
+  useGlossary: boolean
 }
 export interface Usage {
   prompt_tokens: number
@@ -120,6 +121,7 @@ export interface TranslationRequest extends APIProfile {
   background: string
   styleNotes: string
   glossary: Term[]
+  useGlossary?: boolean
   cues: { id: number; text: string }[]
   context: { source: string; target: string }[]
   futureContext: { id: number; text: string }[]
@@ -147,6 +149,7 @@ export const defaultSettings: Settings = {
   temperature: 0.1,
   maxTokens: 8192,
   timeoutSeconds: 120,
+  useGlossary: true,
 }
 
 export function localID(): string {
@@ -209,6 +212,7 @@ export function validateSettings(settings: Settings): void {
     throw new Error('Temperature 必须在 0～2 之间')
   if (!boundedText(settings.background, limits.background))
     throw new Error('背景设定过长，请控制在 8000 个汉字以内')
+  if (typeof settings.useGlossary !== 'boolean') throw new Error('术语库开关无效')
 }
 
 export function buildChunks(cues: Cue[], settings: Settings): Chunk[] {

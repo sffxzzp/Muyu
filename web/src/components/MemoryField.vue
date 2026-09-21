@@ -12,6 +12,7 @@ const props = defineProps<{
   disabled?: boolean
   multiline?: boolean
   placeholder?: string
+  testId?: string
 }>()
 const draft = computed(() => memoryEdits.get(props.jobId, props.field))
 const saved = computed(() =>
@@ -38,6 +39,7 @@ const inputValue = (event: Event) => (event.target as HTMLInputElement).value
       :is="multiline ? 'textarea' : 'input'"
       :value="memoryEdits.value(jobId, field)"
       :aria-label="label"
+      :data-testid="testId"
       :aria-invalid="!!draft?.error"
       :maxlength="maximum"
       :disabled="disabled"

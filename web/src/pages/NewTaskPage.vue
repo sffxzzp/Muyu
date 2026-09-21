@@ -127,7 +127,7 @@ async function makeJob(start: boolean) {
       filename.value,
       fileDocument.value,
       settings.value,
-      parseSeedTerms(seedTerms.value),
+      parseSeedTerms(settings.value.useGlossary ? seedTerms.value : ''),
     )
     creating.value = false
     navigate('detail', job.id)
@@ -213,11 +213,26 @@ async function makeJob(start: boolean) {
             <strong>{{ t('一个术语，从头到尾一个译法') }}</strong>
             <p>{{ t('每轮积累专名、专业表达与风格备忘，让后续翻译沿用。') }}</p>
           </div>
-          <button class="text-button" :aria-expanded="showSeed" @click="showSeed = !showSeed">
+          <label class="checkbox-label glossary-toggle">
+            <input
+              v-model="settings.useGlossary"
+              type="checkbox"
+              data-testid="use-glossary"
+              :aria-label="t('使用术语库')"
+              @change="if (!settings.useGlossary) showSeed = false"
+            />{{ t('使用术语库') }}
+          </label>
+          <button
+            v-if="settings.useGlossary"
+            class="text-button"
+            data-testid="seed-glossary"
+            :aria-expanded="showSeed"
+            @click="showSeed = !showSeed"
+          >
             {{ t('预设术语') }}<Icon name="down" :size="14" :class="{ rotated: showSeed }" />
           </button>
         </div>
-        <div v-if="showSeed" class="seed-terms">
+        <div v-if="settings.useGlossary && showSeed" class="seed-terms">
           <label class="field"
             ><span>{{ t('你的术语优先级最高') }}</span
             ><textarea

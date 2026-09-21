@@ -124,6 +124,7 @@ export function validateJob(value: unknown): Job {
   const settings = Object.fromEntries(
     Object.keys(defaultSettings).map((key) => [key, value.settings[key]]),
   ) as unknown as Settings
+  if (settings.useGlossary == null) settings.useGlossary = true
   validateSettings(settings)
   if (!Array.isArray(value.chunks) || value.chunks.length < 1 || value.chunks.length > doc.cues.length)
     throw new Error('分块记录无效')

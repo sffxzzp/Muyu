@@ -188,7 +188,7 @@ test('storage failure keeps edited text and new translation progress recoverable
   await cue(page, 1).fill('存储空间恢复后也要保留这次修正')
   await expect(page.locator('[data-cue-id="1"] .translation-edit-state')).toContainText('存储空间不足')
   await page.getByRole('checkbox', { name: '跟随翻译进度' }).uncheck()
-  await page.getByRole('tab', { name: /术语与风格/ }).click()
+  await page.getByTestId('glossary-tab').click()
   await page.getByRole('tab', { name: /字幕对照/ }).click()
   await expect(page.getByRole('checkbox', { name: '跟随翻译进度' })).not.toBeChecked()
   await page.getByRole('button', { name: /^任务记录/ }).click()

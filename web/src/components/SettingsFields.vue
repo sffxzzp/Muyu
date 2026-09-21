@@ -55,6 +55,17 @@ const targetLanguage = computed({
     </option>
   </datalist>
   <p class="field-hint">{{ t('可选择语言，也可直接输入其他语言名称。') }}</p>
+  <label class="checkbox-label glossary-setting">
+    <input
+      v-model="settings.useGlossary"
+      type="checkbox"
+      :disabled="disabled"
+      :aria-label="t('使用术语库')"
+    />{{ t('使用术语库') }}
+  </label>
+  <p class="field-hint">
+    {{ t('关闭后不向模型发送术语，也不提取新术语。已保存的词条仍保留在本地。') }}
+  </p>
   <div class="field-divider"></div>
   <div class="field-title">
     <span><Icon name="list" :size="16" />{{ t('语义分块') }}</span

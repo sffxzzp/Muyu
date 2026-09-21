@@ -3,7 +3,14 @@ import fixtures from './testdata/translation_protocol.json'
 import systemPrompt from './system_prompt.txt?raw'
 import { APIError, DirectConnectionError } from './transport'
 import { glossaryCharacterBudget, selectGlossary } from './glossary'
-import { directEndpoint, parseTranslation, prepareTranslation, retryAfter, translate } from './translation'
+import {
+  directEndpoint,
+  parseTranslation,
+  prepareTranslation,
+  retryAfter,
+  translate,
+  translationSystemPrompt,
+} from './translation'
 import type { TranslationRequest } from './types'
 
 const request = () => structuredClone(fixtures[0].request) as TranslationRequest
@@ -78,6 +85,28 @@ describe('translation protocol', () => {
     const result = parseTranslation(completion().choices[0].message.content, req, selected)
     expect(result.glossary).toHaveLength(before.length + 1)
     expect(result.glossary.at(-1)).toEqual({ source: 'Ann', target: '安妮' })
+    expect(result.warnings).toEqual([])
+  })
+
+  it('omits glossary from the prompt and does not merge returned terms when glossary is off', () => {
+    const req = request()
+    req.useGlossary = false
+    req.glossary = [
+      { source: 'cash flow', target: '现金流', locked: true },
+      { source: 'Project Nova', target: '新星计划', locked: true },
+    ]
+    const prepared = prepareTranslation(req)
+    expect(prepared.glossary).toEqual([])
+    expect(prepared.payload.messages[0]).toEqual({
+      role: 'system',
+      content: translationSystemPrompt(false),
+    })
+    expect(JSON.parse(prepared.payload.messages[1].content as string).established_glossary).toEqual([])
+    const response = JSON.parse(completion().choices[0].message.content)
+    response.glossary = [{ source: 'Ann', target: '安妮' }]
+    const result = parseTranslation(JSON.stringify(response), req, [])
+    expect(result.glossary).toEqual(req.glossary)
+    expect(result.glossaryUsed).toEqual([])
     expect(result.warnings).toEqual([])
   })
 

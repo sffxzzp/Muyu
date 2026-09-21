@@ -249,6 +249,21 @@ describe('sequential browser translation runner', () => {
     ).toBe(true)
   })
 
+  it('does not send or merge glossary terms when the task disables the glossary', async () => {
+    const h = harness(4)
+    const job = h.workspace.jobs[0]
+    const existing = structuredClone(job.glossary)
+    job.settings.useGlossary = false
+    await h.runner.run('test-job-1', 'dummy-key')
+    expect(h.calls).toHaveLength(2)
+    expect(h.calls.every((call) => call.body.glossary.length === 0 && call.body.useGlossary === false)).toBe(
+      true,
+    )
+    expect(job.glossary).toEqual(existing)
+    expect(job.lastGlossarySent).toBe(0)
+    expect(job.glossaryHistory.every((round) => round.terms.length === 0)).toBe(true)
+  })
+
   it('resumes at the first unfinished block without retranslating completed cues', async () => {
     const h = harness(),
       job = h.workspace.jobs[0]

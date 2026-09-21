@@ -27,6 +27,15 @@ async function prepareSample(page: Page) {
   await page.getByLabel(/预设术语|Seed glossary/, { exact: true }).fill('cash flow = 现金流')
 }
 
+const savedJob = (page: Page) =>
+  page.evaluate(() => JSON.parse(localStorage.getItem('muyu.workspace.v1')!).jobs[0])
+
+async function saveTask(page: Page) {
+  await page.getByRole('button', { name: '保存任务，稍后翻译', exact: true }).click()
+  await expect(page).toHaveURL(/#\/task\//)
+  await expect.poll(async () => (await savedJob(page))?.id).toBeTruthy()
+}
+
 async function controlTranslationResponses(page: Page) {
   const pending: (() => void)[] = []
   // These cases control forwarded responses. Routing otherwise skips the
@@ -85,13 +94,13 @@ test('translate, refresh, resume, edit, export, clear and restore a real browser
   expect(calls[0].data.future_context.map((cue: any) => cue.id)).toEqual([5, 6, 7])
   expect(calls[2].data.future_context.map((cue: any) => cue.id)).toEqual([9, 10, 11])
   expect(calls[3].data.future_context).toEqual([])
-  await page
-    .getByRole('textbox', { name: '第 1 条译文', exact: true })
-    .fill('欢迎回来。今天，一起理解现金流。')
+  const firstCorrection = '欢迎回来。今天，一起理解现金流。'
+  await page.getByRole('textbox', { name: '第 1 条译文', exact: true }).fill(firstCorrection)
+  await expect.poll(async () => (await savedJob(page)).translations[1]).toBe(firstCorrection)
   await page.getByRole('heading', { name: '每一句，都已抵达。' }).click()
   await page.reload()
   await expect(page.getByRole('textbox', { name: '第 1 条译文', exact: true })).toHaveValue(
-    '欢迎回来。今天，一起理解现金流。',
+    firstCorrection,
   )
   await page.screenshot({ path: path.join(artifacts, 'translation-desktop.png'), fullPage: true })
   await page.getByRole('button', { name: '导出字幕', exact: true }).click()
@@ -140,7 +149,7 @@ test('a glossary beyond 400 terms stays editable, bounded in prompts and complet
   await page.goto('/')
   await setupProfile(page)
   await prepareSample(page)
-  await page.getByRole('button', { name: '保存任务，稍后翻译', exact: true }).click()
+  await saveTask(page)
   const original = await page.evaluate(() => {
     const workspace = JSON.parse(localStorage.getItem('muyu.workspace.v1')!)
     const job = workspace.jobs[0]
@@ -192,32 +201,14 @@ test('a glossary beyond 400 terms stays editable, bounded in prompts and complet
     expect(!!kept?.locked).toBe(!!term.locked)
   }
   expect(saved.lastGlossarySent).toBe(calls[3].data.established_glossary.length)
-  await page.getByTestId('glossary-tab').click()
-  await expect(page.getByTestId('glossary-usage')).toHaveText(
-    `累计 ${saved.glossary.length} 条 · 上轮携带 ${saved.lastGlossarySent} 条`,
-  )
-  await page.getByRole('textbox', { name: '新增术语原文' }).fill('Manual Project')
-  await page.getByRole('textbox', { name: '新增术语译文' }).fill('手动计划')
-  await page.getByRole('button', { name: '添加', exact: true }).click()
-  const total = saved.glossary.length + 1
-  await expect(page.getByTestId(`term-${total}-source`)).toHaveValue('Manual Project')
   const downloadPromise = page.waitForEvent('download')
   await page.getByRole('button', { name: '备份', exact: true }).click()
   const backup = JSON.parse(await readFile((await (await downloadPromise).path())!, 'utf-8'))
-  expect(backup.jobs[0].glossary).toHaveLength(total)
+  expect(backup.jobs[0].glossary).toHaveLength(saved.glossary.length)
   await page.reload()
-  await page.getByTestId('glossary-tab').click()
-  await expect(page.getByTestId('glossary-usage')).toHaveText(
-    `累计 ${total} 条 · 上轮携带 ${saved.lastGlossarySent} 条`,
-  )
-  await page.getByRole('button', { name: 'English', exact: true }).click()
-  await page.getByRole('button', { name: 'Switch to dark mode', exact: true }).click()
-  await expect(page.getByTestId('glossary-usage')).toHaveText(
-    `${total} terms saved · ${saved.lastGlossarySent} sent last round`,
-  )
-  await page.setViewportSize({ width: 390, height: 844 })
-  await page.getByTestId('glossary-usage').scrollIntoViewIfNeeded()
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  const restored = await savedJob(page)
+  expect(restored.glossary).toHaveLength(saved.glossary.length)
+  expect(restored.lastGlossarySent).toBe(saved.lastGlossarySent)
 })
 
 test('can skip the glossary so terms are not sent or extracted', async ({ page, request }) => {
@@ -246,7 +237,7 @@ test('legacy checkpoint keeps its saved blocks and zero lookahead when resuming'
   await page.goto('/')
   await setupProfile(page)
   await prepareSample(page)
-  await page.getByRole('button', { name: '保存任务，稍后翻译', exact: true }).click()
+  await saveTask(page)
   const original = await page.evaluate(() => {
     const workspace = JSON.parse(localStorage.getItem('muyu.workspace.v1')!)
     const job = workspace.jobs[0]

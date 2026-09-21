@@ -57,6 +57,9 @@ test('server throttling waits and resumes with zero model retries while preservi
   await first.fill(correction)
   await expect(page.getByRole('heading', { name: '每一句，都已抵达。' })).toBeVisible()
   await expect(first).toHaveValue(correction)
+  await expect
+    .poll(async () => JSON.parse(await page.evaluate(() => localStorage.getItem('muyu.workspace.v1')!)).jobs[0].translations[1])
+    .toBe(correction)
   const { calls } = await (await request.get(controlURL)).json()
   expect(calls.map((call: any) => call.data.cues_to_translate[0].id)).toEqual([1, 5, 9])
   const job = await page.evaluate(() => JSON.parse(localStorage.getItem('muyu.workspace.v1')!).jobs[0])

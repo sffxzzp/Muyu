@@ -31,6 +31,9 @@ const fileDocument = ref<SubtitleDocument>(),
 const settings = ref<Settings>({ ...defaultSettings }),
   seedTerms = ref(''),
   showSeed = ref(false)
+function onGlossaryToggle() {
+  if (!settings.value.useGlossary) showSeed.value = false
+}
 const estimatedChunks = computed(() => {
   try {
     return fileDocument.value ? buildChunks(fileDocument.value.cues, settings.value).length : 0
@@ -219,7 +222,7 @@ async function makeJob(start: boolean) {
               type="checkbox"
               data-testid="use-glossary"
               :aria-label="t('使用术语库')"
-              @change="if (!settings.useGlossary) showSeed = false"
+              @change="onGlossaryToggle"
             />{{ t('使用术语库') }}
           </label>
           <button

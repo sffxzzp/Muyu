@@ -97,11 +97,12 @@ describe('translation protocol', () => {
     ]
     const prepared = prepareTranslation(req)
     expect(prepared.glossary).toEqual([])
-    expect(prepared.payload.messages[0]).toEqual({
+    const messages = prepared.payload.messages as { role: string; content: string }[]
+    expect(messages[0]).toEqual({
       role: 'system',
       content: translationSystemPrompt(false),
     })
-    expect(JSON.parse(prepared.payload.messages[1].content as string).established_glossary).toEqual([])
+    expect(JSON.parse(messages[1].content).established_glossary).toEqual([])
     const response = JSON.parse(completion().choices[0].message.content)
     response.glossary = [{ source: 'Ann', target: '安妮' }]
     const result = parseTranslation(JSON.stringify(response), req, [])

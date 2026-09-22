@@ -36,8 +36,9 @@ make build
 
 Open http://127.0.0.1:7777. The first build will install frontend dependencies.
 
+### Docker
+
 ```bash
-# Docker
 docker compose up -d --build
 ```
 

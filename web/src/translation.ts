@@ -13,8 +13,13 @@ export function translationSystemPrompt(useGlossary = true): string {
   return useGlossary ? glossarySystemPrompt : noGlossarySystemPrompt
 }
 
-function requireValue(condition: unknown, message: Message, retryable = false): asserts condition {
-  if (!condition) throw new APIError(message, retryable)
+function requireValue(
+  condition: unknown,
+  message: Message,
+  retryable = false,
+  failureKind?: APIError['failureKind'],
+): asserts condition {
+  if (!condition) throw new APIError(message, retryable, 0, false, failureKind)
 }
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
@@ -59,10 +64,10 @@ function validateRequest(req: TranslationRequest): void {
   )
   requireValue(
     req.cues.length >= 1 &&
-      req.cues.length <= 100 &&
+      req.cues.length <= 1000 &&
       req.context.length <= 20 &&
       req.futureContext.length <= 20,
-    '每块需包含 1～100 条字幕，前文与后文各最多 20 条',
+    '每块需包含 1～1000 条字幕，前文与后文各最多 20 条',
   )
   const seen = new Set<number>()
   let size = 0
@@ -85,7 +90,7 @@ function validateRequest(req: TranslationRequest): void {
   }
   for (const line of req.context) size += byteLength(line.source) + byteLength(line.target)
   requireValue(
-    size <= 180000 &&
+    size <= 400000 &&
       boundedText(req.background, limits.background) &&
       boundedText(req.styleNotes, limits.style),
     '字幕块、上下文或背景设定过长，请减小分块',
@@ -112,7 +117,7 @@ function validateRequest(req: TranslationRequest): void {
   requireValue(
     Number.isInteger(req.maxTokens) &&
       req.maxTokens >= 256 &&
-      req.maxTokens <= 32768 &&
+      req.maxTokens <= 128000 &&
       Number.isInteger(req.timeoutSeconds) &&
       req.timeoutSeconds >= 10 &&
       req.timeoutSeconds <= 180,
@@ -183,6 +188,7 @@ export function parseTranslation(
       1: decoded.translations.length,
     }),
     true,
+    'cue-structure',
   )
   const expected = new Map(req.cues.map((cue) => [cue.id, cue]))
   const byID = new Map<number, string>()
@@ -191,6 +197,7 @@ export function parseTranslation(
       record(line) && typeof line.id === 'number' && typeof line.text === 'string',
       '译文包含缺失、重复、未知编号或空白条目',
       true,
+      'cue-structure',
     )
     const cue = expected.get(line.id)
     const text = cleanText(line.text)
@@ -198,6 +205,7 @@ export function parseTranslation(
       cue && !byID.has(line.id) && text.trim() && boundedText(text, limits.translation),
       '译文包含缺失、重复、未知编号或空白条目',
       true,
+      'cue-structure',
     )
     requireValue(
       JSON.stringify(cue.text.match(inlineTags) ?? []) === JSON.stringify(text.match(inlineTags) ?? []),

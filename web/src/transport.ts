@@ -6,6 +6,7 @@ export class APIError extends MessageError {
     public retryable = false,
     public retryAfter = 0,
     public rateLimited = false,
+    public failureKind?: 'cue-structure',
   ) {
     super(message)
   }

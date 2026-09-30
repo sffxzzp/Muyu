@@ -78,7 +78,7 @@ const targetLanguage = computed({
         v-model.number="settings.targetChunkSize"
         type="number"
         min="1"
-        max="100"
+        max="1000"
         :aria-label="t('目标块大小')"
         :disabled="disabled"
     /></label>
@@ -88,7 +88,7 @@ const targetLanguage = computed({
         v-model.number="settings.maxChunkSize"
         type="number"
         min="1"
-        max="100"
+        max="1000"
         :aria-label="t('分块条数上限')"
         :disabled="disabled"
     /></label>
@@ -136,7 +136,7 @@ const targetLanguage = computed({
           v-model.number="settings.maxChunkCharacters"
           type="number"
           min="500"
-          max="30000"
+          max="60000"
           step="500"
           :disabled="disabled"
       /></label>
@@ -155,7 +155,7 @@ const targetLanguage = computed({
           v-model.number="settings.maxTokens"
           type="number"
           min="256"
-          max="32768"
+          max="128000"
           step="256"
           :disabled="disabled"
       /></label>

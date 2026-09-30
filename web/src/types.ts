@@ -191,14 +191,14 @@ export function validateSettings(settings: Settings): void {
     throw new Error('请填写有效的源语言和目标语言')
   if (settings.sourceLanguage === settings.targetLanguage) throw new Error('源语言和目标语言需要不同')
   const bounds: [keyof Settings, number, number][] = [
-    ['targetChunkSize', 1, 100],
-    ['maxChunkSize', 1, 100],
-    ['maxChunkCharacters', 500, 30000],
+    ['targetChunkSize', 1, 1000],
+    ['maxChunkSize', 1, 1000],
+    ['maxChunkCharacters', 500, 60000],
     ['contextSize', 0, 20],
     ['futureContextSize', 0, 20],
     ['rpm', 1, 600],
     ['maxRetries', 0, 8],
-    ['maxTokens', 256, 32768],
+    ['maxTokens', 256, 128000],
     ['timeoutSeconds', 10, 180],
   ]
   for (const [key, min, max] of bounds)

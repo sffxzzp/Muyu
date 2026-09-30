@@ -126,6 +126,7 @@ export class Runner {
         let result: TranslationResult | undefined
         let retryAt = 0
         let retryReason: 'rate' | 'retry' = 'retry'
+        let splitChunk = false
         for (let attempt = 0; attempt <= job.settings.maxRetries;) {
           this.runtime.attempt = attempt
           await this.wait(retryAt, retryReason)
@@ -201,6 +202,35 @@ export class Runner {
               await this.hooks.save(job)
               continue
             }
+            if (
+              failure instanceof APIError &&
+              failure.failureKind === 'cue-structure' &&
+              chunk.end - chunk.start > 1
+            ) {
+              const leftCount = Math.ceil((chunk.end - chunk.start) / 2)
+              const middle = chunk.start + leftCount
+              const rightCount = chunk.end - middle
+              job.chunks.splice(
+                job.completedChunks,
+                1,
+                { start: chunk.start, end: middle },
+                { start: middle, end: chunk.end },
+              )
+              event(
+                job,
+                message('第 {0} 块的字幕条数或编号不匹配，已拆成 {1} 条和 {2} 条后重试', {
+                  0: job.completedChunks + 1,
+                  1: leftCount,
+                  2: rightCount,
+                }),
+                'warning',
+              )
+              job.updatedAt = this.now()
+              await this.hooks.save(job)
+              await this.hooks.changed?.()
+              splitChunk = true
+              break
+            }
             if (!(failure instanceof APIError) || !failure.retryable || attempt === job.settings.maxRetries)
               throw failure
             retryAt = this.now() + Math.max(failure.retryAfter * 1000, 2000 * 2 ** attempt)
@@ -218,6 +248,7 @@ export class Runner {
             attempt++
           }
         }
+        if (splitChunk) continue
         if (this.discarded) throw new Paused()
         if (!result) throw new Error('未收到翻译结果')
         // A checkpoint contains the entire block, its glossary, and its style

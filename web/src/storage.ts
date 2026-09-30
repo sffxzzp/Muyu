@@ -135,7 +135,7 @@ export function validateJob(value: unknown): Job {
       chunk.start !== end ||
       !Number.isInteger(chunk.end) ||
       chunk.end <= end ||
-      chunk.end - end > 100 ||
+      chunk.end - end > 1000 ||
       chunk.end > doc.cues.length
     )
       throw new Error('分块记录不连续')
